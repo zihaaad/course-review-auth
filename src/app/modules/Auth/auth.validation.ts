@@ -1,6 +1,6 @@
 import {z} from "zod";
 
-const userValidationSchema = z.object({
+const createUserValidationSchema = z.object({
   body: z.object({
     username: z.string({
       required_error: "Username is required",
@@ -20,6 +20,6 @@ const userValidationSchema = z.object({
   role: z.enum(["admin", "user"]).default("user"),
 });
 
-export const UserValidations = {
-  userValidationSchema,
+export const AuthValidations = {
+  createUserValidationSchema,
 };
