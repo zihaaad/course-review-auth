@@ -2,7 +2,7 @@ import {CourseServices} from "./course.service";
 import sendResponse from "../../utilities/sendResponse";
 import catchAsync from "../../utilities/catchAsync";
 const createCourse = catchAsync(async (req, res) => {
-  const result = await CourseServices.createCourse(req.body);
+  const result = await CourseServices.createCourse(req.user, req.body);
   sendResponse(res, {
     statusCode: 200,
     message: "Course created successfully",

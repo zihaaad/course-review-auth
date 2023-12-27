@@ -2,8 +2,10 @@ import {TCourse} from "./course.interface";
 import moment from "moment";
 import {Course} from "./course.model";
 import {Review} from "../Review/review.model";
+import {JwtPayload} from "jsonwebtoken";
+import {User} from "../Auth/auth.model";
 
-const createCourse = async (payload: TCourse) => {
+const createCourse = async (user: JwtPayload, payload: TCourse) => {
   if (!(await Course.isCategoryExists(String(payload.categoryId)))) {
     throw new Error("CategoryId is not Valid.");
   }
@@ -14,6 +16,13 @@ const createCourse = async (payload: TCourse) => {
     endDate.diff(startDate, "weeks", true)
   );
   payload.durationInWeeks = weeksDuration;
+
+  const {username, email} = user;
+  const userData = await User.findOne({username, email}).select("_id");
+
+  if (userData) {
+    payload.createdBy = userData._id;
+  }
 
   const result = await Course.create(payload);
   return result;
@@ -82,7 +91,8 @@ const getAllCourses = async (query: Record<string, unknown>) => {
   const course = await Course.find(queryObj)
     .skip(skip)
     .limit(limit)
-    .sort(sortBy);
+    .sort(sortBy)
+    .populate("createdBy");
 
   const result = {
     meta: {page, limit, total: course.length},

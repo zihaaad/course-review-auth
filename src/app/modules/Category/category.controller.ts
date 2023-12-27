@@ -3,7 +3,7 @@ import catchAsync from "../../utilities/catchAsync";
 import sendResponse from "../../utilities/sendResponse";
 
 const createCategroy = catchAsync(async (req, res) => {
-  const result = await CategoryServices.createCategroy(req.body);
+  const result = await CategoryServices.createCategroy(req.user, req.body);
 
   sendResponse(res, {
     statusCode: 201,

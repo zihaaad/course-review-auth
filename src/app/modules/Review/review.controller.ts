@@ -3,7 +3,7 @@ import catchAsync from "../../utilities/catchAsync";
 import sendResponse from "../../utilities/sendResponse";
 
 const createReview = catchAsync(async (req, res) => {
-  const result = await ReviewServices.createReview(req.body);
+  const result = await ReviewServices.createReview(req.user, req.body);
 
   sendResponse(res, {
     statusCode: 201,
