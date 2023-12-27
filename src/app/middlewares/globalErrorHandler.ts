@@ -1,11 +1,14 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {ErrorRequestHandler} from "express";
+import {JsonWebTokenError} from "jsonwebtoken";
 import {ZodError} from "zod";
 
 const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   let message;
   let errorMessage;
+  let errorDetails = err;
+  let stack = err.stack;
 
   if (err instanceof ZodError) {
     message = "Validation Error";
@@ -23,6 +26,12 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     const match = err.message.match(/"([^"]*)"/);
     const extractedMsg = match && match[1];
     errorMessage = `${extractedMsg} is already exists`;
+  } else if (err instanceof JsonWebTokenError) {
+    message = "Unauthorized Access";
+    errorMessage =
+      "You do not have the necessary permissions to access this resource.";
+    errorDetails = null;
+    stack = null;
   } else if (err instanceof Error) {
     message = "Something went Wrong!";
     errorMessage = err?.message;
@@ -32,8 +41,8 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     success: false,
     message,
     errorMessage,
-    errorDetails: err,
-    stack: err.stack,
+    errorDetails,
+    stack,
   });
 };
 
