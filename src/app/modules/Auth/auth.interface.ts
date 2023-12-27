@@ -4,3 +4,14 @@ export interface IRegisterUser {
   password: string;
   role: "admin" | "user";
 }
+
+export interface ILoginUser {
+  username: string;
+  password: string;
+}
+
+export interface IJwtPayload {
+  username: string;
+  email: string;
+  role: string;
+}
