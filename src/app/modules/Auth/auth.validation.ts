@@ -41,7 +41,31 @@ const loginUserValidationSchema = z.object({
   }),
 });
 
+const changePasswordValidationSchema = z.object({
+  body: z.object({
+    currentPassword: z.string({
+      required_error: "Current Password is required",
+      invalid_type_error: "Password must be string",
+    }),
+    newPassword: z
+      .string({
+        required_error: "New Password is required",
+        invalid_type_error: "New Password must be string",
+      })
+      .min(8, {message: "Password must be at least 8 characters long"})
+      .max(20, {message: "Password can not be more than 20 characters"})
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+        {
+          message:
+            "New Password must include at least one lowercase letter, one uppercase letter, one digit, and one special character",
+        }
+      ),
+  }),
+});
+
 export const AuthValidations = {
   createUserValidationSchema,
   loginUserValidationSchema,
+  changePasswordValidationSchema,
 };

@@ -1,3 +1,5 @@
+import {USER_ROLE} from "./auth.utils";
+
 export interface IRegisterUser {
   username: string;
   email: string;
@@ -15,3 +17,5 @@ export interface IJwtPayload {
   email: string;
   role: string;
 }
+
+export type TUserRole = keyof typeof USER_ROLE;

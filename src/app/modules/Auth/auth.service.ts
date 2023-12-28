@@ -5,6 +5,7 @@ import {IJwtPayload, ILoginUser, IRegisterUser} from "./auth.interface";
 import bcrypt from "bcrypt";
 import {User} from "./auth.model";
 import {createAccessToken} from "./auth.utils";
+import {JwtPayload} from "jsonwebtoken";
 
 const createUser = async (payload: IRegisterUser) => {
   payload.password = await bcrypt.hash(
@@ -57,7 +58,45 @@ const loginUser = async (payload: ILoginUser) => {
   return result;
 };
 
+const changePassword = async (
+  user: JwtPayload,
+  currentPassword: string,
+  newPassword: string
+) => {
+  const {username, email, role} = user;
+  const userData = await User.findOne({username, email, role}).select(
+    "+password"
+  );
+
+  const isCurrentAndNewPasswordSame =
+    userData?.password &&
+    (await bcrypt.compare(newPassword, userData.password));
+
+  const isPasswordMatched =
+    userData?.password &&
+    (await bcrypt.compare(currentPassword, userData.password));
+
+  if (!isPasswordMatched) {
+    throw new Error("Current password is wrong!");
+  }
+
+  if (isCurrentAndNewPasswordSame) {
+    throw new Error("Current password & new password can't be same!");
+  }
+
+  const hashedNewPassword = await bcrypt.hash(
+    newPassword,
+    Number(config.bcrypt_salt_rounds)
+  );
+  const result = await User.findByIdAndUpdate(userData?._id, {
+    password: hashedNewPassword,
+  });
+
+  return result;
+};
+
 export const AuthServices = {
   createUser,
   loginUser,
+  changePassword,
 };

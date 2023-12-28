@@ -4,8 +4,9 @@ import config from "../config";
 import catchAsync from "../utilities/catchAsync";
 import {NextFunction, Request, Response} from "express";
 import {User} from "../modules/Auth/auth.model";
+import {TUserRole} from "../modules/Auth/auth.interface";
 
-const auth = (userRole: string) => {
+const auth = (...userRole: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization;
 
@@ -26,7 +27,7 @@ const auth = (userRole: string) => {
       throw new Error("User is not found");
     }
 
-    if (userRole !== role) {
+    if (userRole && !userRole.includes(role)) {
       throw new Error("You are not Authorized ");
     }
 
