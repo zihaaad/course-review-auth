@@ -1,7 +1,12 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import config from "../../config";
-import {IJwtPayload, ILoginUser, IRegisterUser} from "./auth.interface";
+import {
+  IJwtPayload,
+  ILoginUser,
+  IRegisterUser,
+  TPasswordHistory,
+} from "./auth.interface";
 import bcrypt from "bcrypt";
 import {User} from "./auth.model";
 import {createAccessToken} from "./auth.utils";
@@ -65,7 +70,7 @@ const changePassword = async (
 ) => {
   const {username, email, role} = user;
   const userData = await User.findOne({username, email, role}).select(
-    "+password"
+    "+password +passwordHistory"
   );
 
   const isCurrentAndNewPasswordSame =
@@ -84,15 +89,53 @@ const changePassword = async (
     throw new Error("Current password & new password can't be same!");
   }
 
+  const isSameAsPreviousTwoPasswords =
+    userData?.passwordHistory?.some((previous) =>
+      bcrypt.compareSync(newPassword, previous.password)
+    ) ||
+    (userData?.password && bcrypt.compareSync(newPassword, userData.password));
+
+  if (isSameAsPreviousTwoPasswords) {
+    const lastUsedTimestamp =
+      userData?.passwordHistory &&
+      userData.passwordHistory.length > 0 &&
+      userData.passwordHistory[0].timestamp;
+
+    return {
+      success: false,
+      statusCode: 400,
+      message: `Password change failed. Ensure the new password is unique and not among the last 2 used (last used on ${lastUsedTimestamp}).`,
+      data: null,
+    };
+  }
+
   const hashedNewPassword = await bcrypt.hash(
     newPassword,
     Number(config.bcrypt_salt_rounds)
   );
+
   const result = await User.findByIdAndUpdate(userData?._id, {
     password: hashedNewPassword,
   });
 
-  return result;
+  if (result && userData) {
+    const previousPassword: TPasswordHistory = {
+      password: userData.password,
+      timestamp: new Date(),
+    };
+
+    userData.passwordHistory?.unshift(previousPassword);
+    userData.passwordHistory?.splice(2);
+
+    await userData.save();
+  }
+
+  return {
+    success: true,
+    statusCode: 200,
+    message: "Password changed successfully",
+    data: result,
+  };
 };
 
 export const AuthServices = {

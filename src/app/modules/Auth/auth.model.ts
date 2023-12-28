@@ -26,6 +26,15 @@ const createUserSchema = new Schema<IRegisterUser>(
       enum: ["admin", "user"],
       default: "user",
     },
+    passwordHistory: {
+      type: [
+        {
+          password: String,
+          timestamp: Date,
+        },
+      ],
+      select: 0,
+    },
   },
   {timestamps: true}
 );

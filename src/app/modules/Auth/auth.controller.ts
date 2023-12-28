@@ -29,11 +29,8 @@ const changePassword = catchAsync(async (req, res) => {
     currentPassword,
     newPassword
   );
-  sendResponse(res, {
-    statusCode: 200,
-    message: "Password changed successfully",
-    data: result,
-  });
+
+  res.json(result);
 });
 
 export const AuthControllers = {
