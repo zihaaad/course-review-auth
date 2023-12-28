@@ -155,7 +155,7 @@ const updateCourse = async (id: string, payload: Partial<TCourse>) => {
     });
   }
 
-  const result = await Course.findById(id);
+  const result = await Course.findById(id).populate("createdBy");
   return result;
 };
 
@@ -163,8 +163,8 @@ const courseWithReviews = async (courseId: string) => {
   if (!(await Course.isCourseExists(courseId))) {
     throw new Error("Course Doesn't Exists.");
   }
-  const course = await Course.findById(courseId);
-  const reviews = await Review.find({courseId});
+  const course = await Course.findById(courseId).populate("createdBy");
+  const reviews = await Review.find({courseId}).populate("createdBy");
 
   const result = {course, reviews};
   return result;

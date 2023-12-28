@@ -15,7 +15,15 @@ const createUserValidationSchema = z.object({
         required_error: "Password is required",
         invalid_type_error: "Password must be string",
       })
-      .max(20, {message: "Password can not be more than 20 characters"}),
+      .min(8, {message: "Password must be at least 8 characters long"})
+      .max(20, {message: "Password can not be more than 20 characters"})
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+        {
+          message:
+            "Password must include at least one lowercase letter, one uppercase letter, one digit, and one special character",
+        }
+      ),
     role: z.enum(["admin", "user"]).default("user"),
   }),
 });
