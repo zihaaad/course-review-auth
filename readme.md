@@ -1,5 +1,9 @@
 ## course-review-auth
 
+### LIVE SITE: https://course-review-auth-alpha.vercel.app
+
+### API DOCUMENTATION: https://documenter.getpostman.com/view/28978568/2s9YsDiZxP
+
 To run the application locally, you have to ensure that you have installed following on your device:
 
 - Node.js (version 18.18.0 or higher)

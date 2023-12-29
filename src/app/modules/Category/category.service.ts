@@ -19,7 +19,9 @@ const createCategroy = async (user: JwtPayload, payload: TCategory) => {
 };
 
 const getAllCategories = async () => {
-  const result = await Category.find().select("-__v").populate("createdBy");
+  const result = await Category.find()
+    .select("-__v")
+    .populate("createdBy", "_id username email role");
   return result;
 };
 

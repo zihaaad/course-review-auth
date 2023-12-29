@@ -9,13 +9,14 @@ const createCourse = async (user: JwtPayload, payload: TCourse) => {
   if (!(await Course.isCategoryExists(String(payload.categoryId)))) {
     throw new Error("CategoryId is not Valid.");
   }
+
   const endDate = moment(payload.endDate);
   const startDate = moment(payload.startDate);
 
   const weeksDuration: number = Math.ceil(
     endDate.diff(startDate, "weeks", true)
   );
-  payload.durationInWeeks = weeksDuration;
+  payload.durationInWeeks = payload.durationInWeeks || weeksDuration;
 
   const {username, email} = user;
   const userData = await User.findOne({username, email}).select("_id");
@@ -92,7 +93,7 @@ const getAllCourses = async (query: Record<string, unknown>) => {
     .skip(skip)
     .limit(limit)
     .sort(sortBy)
-    .populate("createdBy", "_id, username, email, role");
+    .populate("createdBy", "_id username email role");
 
   const result = {
     meta: {page, limit, total: course.length},
@@ -105,14 +106,18 @@ const getAllCourses = async (query: Record<string, unknown>) => {
 const updateCourse = async (id: string, payload: Partial<TCourse>) => {
   const {details, tags, ...remainingCourseData} = payload;
 
-  const endDate = moment(payload.endDate);
-  const startDate = moment(payload.startDate);
+  if (payload.startDate && payload.endDate) {
+    const endDate = moment(payload.endDate);
+    const startDate = moment(payload.startDate);
 
-  const weeksDuration: number = Math.ceil(
-    endDate.diff(startDate, "weeks", true)
-  );
+    const weeksDuration: number = Math.ceil(
+      endDate.diff(startDate, "weeks", true)
+    );
 
-  remainingCourseData.durationInWeeks = weeksDuration;
+    remainingCourseData.durationInWeeks = payload.durationInWeeks
+      ? payload.durationInWeeks
+      : weeksDuration;
+  }
 
   const modifiedData: Record<string, unknown> = {
     ...remainingCourseData,
@@ -157,7 +162,7 @@ const updateCourse = async (id: string, payload: Partial<TCourse>) => {
 
   const result = await Course.findById(id).populate(
     "createdBy",
-    "_id, username, email, role"
+    "_id username email role"
   );
   return result;
 };
@@ -168,11 +173,11 @@ const courseWithReviews = async (courseId: string) => {
   }
   const course = await Course.findById(courseId).populate(
     "createdBy",
-    "_id, username, email, role"
+    "_id username email role"
   );
   const reviews = await Review.find({courseId}).populate(
     "createdBy",
-    "_id, username, email, role"
+    "_id username email role"
   );
 
   const result = {course, reviews};
