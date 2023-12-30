@@ -11,6 +11,7 @@ import bcrypt from "bcrypt";
 import {User} from "./auth.model";
 import {createAccessToken} from "./auth.utils";
 import {JwtPayload} from "jsonwebtoken";
+import moment from "moment";
 
 const createUser = async (payload: IRegisterUser) => {
   payload.password = await bcrypt.hash(
@@ -42,7 +43,7 @@ const loginUser = async (payload: ILoginUser) => {
   }
 
   const jwtPayload: IJwtPayload = {
-    username: user.username,
+    _id: user._id,
     email: user.email,
     role: user.role,
   };
@@ -68,8 +69,8 @@ const changePassword = async (
   currentPassword: string,
   newPassword: string
 ) => {
-  const {username, email, role} = user;
-  const userData = await User.findOne({username, email, role}).select(
+  const {_id} = user;
+  const userData = await User.findById(_id).select(
     "+password +passwordHistory"
   );
 
@@ -99,7 +100,7 @@ const changePassword = async (
     const lastUsedTimestamp =
       userData?.passwordHistory &&
       userData.passwordHistory.length > 0 &&
-      userData.passwordHistory[0].timestamp;
+      moment(userData.passwordHistory[0].timestamp).format("LLLL");
 
     return {
       success: false,

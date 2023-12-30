@@ -18,8 +18,8 @@ const createCourse = async (user: JwtPayload, payload: TCourse) => {
   );
   payload.durationInWeeks = payload.durationInWeeks || weeksDuration;
 
-  const {username, email} = user;
-  const userData = await User.findOne({username, email}).select("_id");
+  const {_id} = user;
+  const userData = await User.findById(_id).select("_id");
 
   if (userData) {
     payload.createdBy = userData._id;

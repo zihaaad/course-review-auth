@@ -1,3 +1,4 @@
+import {Types} from "mongoose";
 import {USER_ROLE} from "./auth.utils";
 
 export type TPasswordHistory = {
@@ -19,7 +20,7 @@ export interface ILoginUser {
 }
 
 export interface IJwtPayload {
-  username: string;
+  _id: Types.ObjectId;
   email: string;
   role: string;
 }

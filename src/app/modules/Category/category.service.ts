@@ -4,11 +4,8 @@ import {Category} from "./category.model";
 import {User} from "../Auth/auth.model";
 
 const createCategroy = async (user: JwtPayload, payload: TCategory) => {
-  const {username, email} = user;
-  const userData = await User.findOne({
-    username,
-    email,
-  }).select("_id");
+  const {_id} = user;
+  const userData = await User.findById(_id).select("_id");
 
   if (userData) {
     payload.createdBy = userData?._id;
